@@ -12,7 +12,7 @@ declare module 'react-plotly.js' {
     onInitialized?: (figure: Readonly<Plotly.Figure>, graphDiv: HTMLDivElement) => void;
     onUpdate?: (figure: Readonly<Plotly.Figure>, graphDiv: HTMLDivElement) => void;
     onPurge?: (graphDiv: HTMLDivElement) => void;
-    onError?: (err: any) => void;
+    onError?: (err: Error) => void;
     debug?: boolean;
   }
 

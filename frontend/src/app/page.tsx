@@ -1,5 +1,5 @@
 "use client";
-import SiteNavbar from "@/components/layout/site-navbar";
+// import SiteNavbar from "@/components/layout/site-navbar";
 import { HeroSectionOne } from "@/components/ui/hero";
 
 export default function HomePage() {

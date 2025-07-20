@@ -1,9 +1,11 @@
 "use client";
- 
- 
+
+
 import { motion } from "motion/react";
 import SiteNavbar from "../layout/site-navbar";
- 
+import Image from "next/image";
+
+
 export function HeroSectionOne() {
   return (
     <div className="relative mx-auto flex max-w-7xl flex-col items-center justify-center">
@@ -80,12 +82,13 @@ export function HeroSectionOne() {
           className="relative z-10 mt-20 rounded-3xl border border-neutral-200 bg-neutral-100 p-4 shadow-md dark:border-neutral-800 dark:bg-neutral-900"
         >
           <div className="w-full overflow-hidden rounded-xl border border-gray-300 dark:border-gray-700">
-            <img
+            <Image
               src="/herochart.png"
               alt="Landing page preview"
               className="aspect-[16/9] h-auto w-full object-cover"
-              height={1000}
               width={1000}
+              height={1000}
+              priority
             />
           </div>
         </motion.div>

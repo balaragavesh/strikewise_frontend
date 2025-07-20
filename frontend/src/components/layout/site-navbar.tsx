@@ -3,7 +3,7 @@
 import {
   Navbar,
   NavBody,
-  NavItems,
+  // NavItems,
   MobileNav,
   NavbarLogo,
   NavbarButton,
@@ -14,12 +14,12 @@ import {
 import {
   NavigationMenu,
   NavigationMenuContent,
-  NavigationMenuIndicator,
+  // NavigationMenuIndicator,
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
-  NavigationMenuViewport,
+  // NavigationMenuViewport,
 } from "@/components/ui/navigation-menu"
 
 import { useState } from "react";
