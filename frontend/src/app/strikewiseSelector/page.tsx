@@ -34,7 +34,7 @@ export default function StrikeWiseSelector() {
 
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:8000/api/strikewise/analyze", {
+      const res = await fetch("https://strikewise-backend.onrender.com/api/strikewise/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
