@@ -33,7 +33,7 @@ export default function SiteNavbar() {
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [userName, setUserName] = useState<string | null>(null);
-  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [, setUserEmail] = useState<string | null>(null);
 
   useEffect(() => {
     setUserName(localStorage.getItem('userName'));

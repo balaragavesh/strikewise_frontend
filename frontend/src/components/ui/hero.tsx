@@ -2,7 +2,7 @@
 
 
 import { motion } from "motion/react";
-import SiteNavbar from "../layout/site-navbar";
+// import SiteNavbar from "../layout/site-navbar";
 import Image from "next/image";
 
 
