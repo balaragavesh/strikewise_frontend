@@ -1,11 +1,18 @@
+// frontend/src/app/strikewiseSelector/page.tsx
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import SiteNavbar from "@/components/layout/site-navbar";
 import StrikeWiseGraph from "@/components/ui/StrikeWiseGraph";
 import { Projection, SelectedContract } from "@/components/types/types";
 
 export default function StrikeWiseSelector() {
+  const router = useRouter();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  // Removed userName and userEmail states here, as SiteNavbar will handle them directly.
+  // The logic for checking authentication (isAuthenticated) and redirecting remains.
+
   const [instrument, setInstrument] = useState("NSE_INDEX|Nifty 50");
   const [expiry, setExpiry] = useState("2025-06-20");
   const [capital, setCapital] = useState<number | "">("");
@@ -21,6 +28,16 @@ export default function StrikeWiseSelector() {
   const [activeTab, setActiveTab] = useState<"graph" | "target">("graph");
   const [optionType, setOptionType] = useState<"CE" | "PE">("CE");
 
+  // Effect to check authentication status on component mount
+  useEffect(() => {
+    const token = localStorage.getItem('accessToken');
+    if (!token) {
+      router.push('/login');
+    } else {
+      setIsAuthenticated(true);
+    }
+  }, [router]);
+
   const handleGenerate = async () => {
     if (
       capital === "" ||
@@ -33,10 +50,29 @@ export default function StrikeWiseSelector() {
     }
 
     setLoading(true);
+    const token = localStorage.getItem('accessToken');
+
+    if (!token) {
+      alert("You are not authenticated. Please log in.");
+      router.push('/login');
+      setLoading(false);
+      return;
+    }
+
     try {
-      const res = await fetch("https://strikewise-backend.onrender.com/api/strikewise/analyze", {
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+      if (!backendUrl) {
+        alert("Backend URL is not configured.");
+        setLoading(false);
+        return;
+      }
+
+      const res = await fetch(`${backendUrl}/api/strikewise/analyze`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
         body: JSON.stringify({
           instrument_key: instrument,
           expiry_date: expiry,
@@ -49,13 +85,22 @@ export default function StrikeWiseSelector() {
         }),
       });
 
-      if (!res.ok) throw new Error("API error");
+      if (res.status === 401 || res.status === 403) {
+        alert("Your session has expired or is invalid. Please log in again.");
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('userName');
+        localStorage.removeItem('userEmail');
+        router.push('/login');
+        return;
+      }
+
+      if (!res.ok) throw new Error(`API error: ${res.statusText}`);
       const data = await res.json();
       setResult(data);
       console.log("API result:", data);
     } catch (error) {
-      console.error("Error:", error);
-      alert("Failed to generate strategy.");
+      console.error("Error generating strategy:", error);
+      alert("Failed to generate strategy. Please check console for details.");
     } finally {
       setLoading(false);
     }
@@ -120,8 +165,18 @@ export default function StrikeWiseSelector() {
     );
   };
 
+  // Display a loading/redirecting message if not authenticated yet
+  if (!isAuthenticated) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-white dark:bg-neutral-950 text-gray-800 dark:text-white">
+        <p>Checking authentication status...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="h-screen overflow-hidden flex flex-col bg-white dark:bg-neutral-950 text-gray-800 dark:text-white">
+      {/* SiteNavbar now does not need userName or userEmail props */}
       <SiteNavbar />
 
       <div className="flex-1 overflow-y-auto px-4 md:px-8 pb-8 pt-20">
@@ -237,7 +292,7 @@ export default function StrikeWiseSelector() {
           <div className="lg:w-2/3 w-full relative">
             <div className="absolute -top-10 right-0 flex gap-2 z-10">
               <button
-                className={`px-4 py-2 rounded-t-md border border-b-0 transition 
+                className={`px-4 py-2 rounded-t-md border border-b-0 transition
                   ${activeTab === "graph"
                     ? "bg-gray-50 dark:bg-neutral-900 text-blue-600 border-gray-200 dark:border-neutral-800"
                     : "bg-white dark:bg-neutral-950 text-gray-600 border-transparent"}`}
@@ -246,7 +301,7 @@ export default function StrikeWiseSelector() {
                 Show Graph
               </button>
               <button
-                className={`px-4 py-2 rounded-t-md border border-b-0 transition 
+                className={`px-4 py-2 rounded-t-md border border-b-0 transition
                   ${activeTab === "target"
                     ? "bg-gray-50 dark:bg-neutral-900 text-green-600 border-gray-200 dark:border-neutral-800"
                     : "bg-white dark:bg-neutral-950 text-gray-600 border-transparent"}`}

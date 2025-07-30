@@ -1,9 +1,9 @@
+// frontend/src/components/layout/site-navbar.tsx
 "use client";
 
 import {
   Navbar,
   NavBody,
-  // NavItems,
   MobileNav,
   NavbarLogo,
   NavbarButton,
@@ -14,17 +14,17 @@ import {
 import {
   NavigationMenu,
   NavigationMenuContent,
-  // NavigationMenuIndicator,
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
-  // NavigationMenuViewport,
 } from "@/components/ui/navigation-menu"
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function SiteNavbar() {
+  const router = useRouter();
   const navItems = [
     { name: "Tools", link: "#tools" },
     { name: "AI Assistant", link: "#assistant" },
@@ -32,6 +32,36 @@ export default function SiteNavbar() {
   ];
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [userName, setUserName] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+
+  useEffect(() => {
+    setUserName(localStorage.getItem('userName'));
+    setUserEmail(localStorage.getItem('userEmail'));
+
+    const handleStorageChange = () => {
+      setUserName(localStorage.getItem('userName'));
+      setUserEmail(localStorage.getItem('userEmail'));
+    };
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('userName');
+    localStorage.removeItem('userEmail');
+    
+    // Update state to immediately reflect the logout in the UI
+    setUserName(null);
+    setUserEmail(null);
+
+    // CHANGE: Use the Next.js router for client-side navigation
+    router.push('/'); 
+  };
 
   return (
     <Navbar>
@@ -59,19 +89,6 @@ export default function SiteNavbar() {
                       </p>
                     </NavigationMenuLink>
                   </li>
-                  {/* <li>
-            <NavigationMenuLink
-              href="#option2"
-              className="block p-2 rounded-md hover:bg-neutral-100 dark:hover:bg-neutral-800 transition"
-            >
-              <div className="text-sm font-semibold text-black dark:text-white">
-                Option 2
-              </div>
-              <p className="text-xs text-neutral-600 dark:text-neutral-400">
-                Short description of Option 2’s purpose.
-              </p>
-            </NavigationMenuLink>
-          </li> */}
                 </ul>
               </NavigationMenuContent>
             </NavigationMenuItem>
@@ -97,10 +114,23 @@ export default function SiteNavbar() {
           </NavigationMenuList>
         </NavigationMenu>
 
-
         <div className="flex items-center gap-4">
-          <NavbarButton variant="secondary">Sign up</NavbarButton>
-          <NavbarButton variant="primary">Login</NavbarButton>
+          {/* Conditional rendering based on userName presence */}
+          {userName ? (
+            <>
+              <span className="text-neutral-700 dark:text-neutral-300 text-sm font-medium">
+                Hello, {userName.split(' ')[0]}!
+              </span>
+              <NavbarButton onClick={handleLogout} variant="primary">
+                Logout
+              </NavbarButton>
+            </>
+          ) : (
+            <>
+              <NavbarButton variant="secondary">Sign up</NavbarButton>
+              <NavbarButton href="/login" as="a" variant="primary">Login</NavbarButton>
+            </>
+          )}
         </div>
       </NavBody>
 
@@ -128,20 +158,39 @@ export default function SiteNavbar() {
             </a>
           ))}
           <div className="flex w-full flex-col gap-4">
-            <NavbarButton
-              onClick={() => setIsMobileMenuOpen(false)}
-              variant="primary"
-              className="w-full"
-            >
-              Sign up
-            </NavbarButton>
-            <NavbarButton
-              onClick={() => setIsMobileMenuOpen(false)}
-              variant="primary"
-              className="w-full"
-            >
-              Login
-            </NavbarButton>
+            {userName ? (
+              <>
+                <span className="text-neutral-600 dark:text-neutral-300 text-base font-medium text-center">
+                  Hello, {userName.split(' ')[0]}!
+                </span>
+                <NavbarButton
+                  onClick={handleLogout}
+                  variant="primary"
+                  className="w-full"
+                >
+                  Logout
+                </NavbarButton>
+              </>
+            ) : (
+              <>
+                <NavbarButton
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  variant="primary"
+                  className="w-full"
+                >
+                  Sign up
+                </NavbarButton>
+                <NavbarButton
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  variant="primary"
+                  className="w-full"
+                  href="/login"
+                  as="a"
+                >
+                  Login
+                </NavbarButton>
+              </>
+            )}
           </div>
         </MobileNavMenu>
       </MobileNav>
